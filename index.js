@@ -1,19 +1,6 @@
 const documents = require('./documents')
 const projects = require('./projects')
 
-/** Composition d'un dossier
- * [OK] Une CNI
- * [OK] 3 avis d'impositions si salarié, 5 sinon (valable pour le couple si marié)
- * [OK] 3 bulletins de salaires si marié
- * [OK] 1 livret de famille si marié
- * [OK] 1 compromis de vente si achat
- * [OK] 1 offre de pret + 1 amortissement si rachat
- * [OK] 2 estimations de bien si rachat
- * [OK] Ajouter un pourcentage en fonction des besoins (si rachat, certains documents ne sont pas demandés)
- * [OK] Afficher pourcentage de complétude de dossier
- * [] Tests
- */
-
 const checkCNI = (project, documents) => {
   const errors = project.mortgagors.reduce((errs, user) => {
     const isCNI = documents.find(d => d.document === 'cni' && d.mortgagor_id === user.id && d.status === 'validé')
