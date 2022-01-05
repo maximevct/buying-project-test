@@ -21,7 +21,6 @@ const checkCNI = (project, documents) => {
   }, [])
   return { name : 'CNI', errors, expected : project.mortgagors.length, actual : project.mortgagors.length - errors.length }
 }
-
 const getTaxNotices = (documents, id) => {
   const allUserTaxNotices = documents.filter(d => d.document === 'avis_impots' && d.status === 'validé' && d.mortgagor_id === id)
   return allUserTaxNotices.filter((t, i) => allUserTaxNotices.findIndex(e => e.year === t.year) === i)
@@ -44,7 +43,6 @@ const checkTaxNotice = (project, documents) => {
   const errs = arrMarried ? checkTaxNoticeMarried(project, documents) : checkTaxNoticeUnmarried(project, documents)
   return { name : 'TaxNotice', ...errs }
 }
-
 const getSalaries = (documents, id) => {
   const allUserSalaries = documents.filter(d => d.document === 'bulletins_salaire' && d.status === 'validé' && d.mortgagor_id === id)
   return allUserSalaries.filter((t, i) => allUserSalaries.findIndex(e => e.year === t.year && e.mois === t.mois) === i)
@@ -93,25 +91,26 @@ const rules = [
   checkEstimation
 ]
 
-const makeStats = (p) => (p.reduce((a, b) => a + b.actual, 0) / p.reduce((a, b) => a + b.expected, 0) * 100).toFixed(2)
+const makeStats = (p) => ({...p, completion : (p.rules.reduce((a, b) => a + b.actual, 0) / p.rules.reduce((a, b) => a + b.expected, 0) * 100).toFixed(2) })
 const applyEachRule = (rules, project, documents) => rules.reduce((acc, rule) => [...acc, rule(project, documents)], [])
 const getCasesStatus = (projects, documents) => 
   projects.reduce(
     (acc, project) => 
-      [...acc, 
-        applyEachRule(
+      [...acc, {
+        project_id : project.id,
+        rules : applyEachRule(
           rules,
           project,
           documents.filter(e => e.project_id === project.id)
         )
-      ]
+      }]
     , []
   ).map(makeStats)
 const main = () => {
-  console.log(getCasesStatus(projects, documents)[0])
-  console.log(getCasesStatus(projects, documents)[1])
+  console.log(JSON.stringify(getCasesStatus(projects, documents), null, 2))
 }
 
-main()
+if (require.main === module)
+  main()
 
 module.exports = Object.fromEntries(rules.map(e => ([e.name, e])))
